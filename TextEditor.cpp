@@ -2252,7 +2252,11 @@ void TextEditor::ColorizeRange(int aFromLine, int aToLine)
 					{
 						hasTokenizeResult = true;
 
-						auto& v = *results.begin();
+						auto v = *results.begin();
+						if (results.size() > 1)
+						{
+							v = results[1];
+						}
 						token_begin = v.first;
 						token_end = v.second;
 						token_color = p.second;
