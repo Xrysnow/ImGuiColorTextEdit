@@ -327,6 +327,8 @@ TextEditor::Coordinates TextEditor::ScreenPosToCoordinates(const ImVec2& aPositi
 {
 	ImVec2 origin = ImGui::GetCursorScreenPos();
 	ImVec2 local(aPosition.x - origin.x + 3.0f, aPosition.y - origin.y);
+	if (local.x < mTextStart || local.y < 0)
+		return Coordinates::Invalid();
 	float spaceSize = ImGui::GetFont()->CalcTextSizeA(ImGui::GetFontSize(), FLT_MAX, -1.0f, " ").x;
 
 	int lineNo = std::max(0, (int)floor(local.y / mCharAdvance.y));
