@@ -8,6 +8,7 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h" // for imGui::GetCurrentWindow()
+#include "imgui_internal.h"
 
 // TODO
 // - multiline comments vs single-line: latter is blocking start of a ML
@@ -1018,6 +1019,12 @@ void TextEditor::Render()
 						drawList->AddRectFilled(cstart, cend, mPalette[(int)PaletteIndex::Cursor]);
 						if (elapsed > 800)
 							mStartTime = timeEnd;
+
+						if(!IsReadOnly())
+						{
+							ImGui::GetCurrentContext()->PlatformImePos = cstart;
+							ImGui::GetCurrentContext()->PlatformImePosViewport = ImGui::GetCurrentWindow()->Viewport;
+						}
 					}
 				}
 			}
