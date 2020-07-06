@@ -271,6 +271,13 @@ public:
 	void Undo(int aSteps = 1);
 	void Redo(int aSteps = 1);
 
+	void SetAutoTooltip(bool aValue) { mAutoTooltip = aValue; }
+	bool IsAutoTooltip() const { return mAutoTooltip; }
+	Coordinates GetHoveredCoordinates() const { return mHoveredCoordinates; }
+	std::string GetHoveredWord() const { return mHoveredWord; }
+	std::string GetHoveredDeclaration() const { return mHoveredDeclaration; }
+	PaletteIndex GetHoveredWordIndex() const { return mHoveredWordIndex; }
+
 	static const Palette& GetDarkPalette();
 	static const Palette& GetLightPalette();
 	static const Palette& GetRetroBluePalette();
@@ -396,4 +403,10 @@ private:
 	uint64_t mStartTime;
 
 	float mLastClick;
+
+	bool mAutoTooltip;
+	std::string mHoveredWord;
+	std::string mHoveredDeclaration;
+	Coordinates mHoveredCoordinates;
+	PaletteIndex mHoveredWordIndex;
 };

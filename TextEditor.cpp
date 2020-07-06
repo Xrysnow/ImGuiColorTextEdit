@@ -50,6 +50,9 @@ TextEditor::TextEditor()
 	, mShowWhitespaces(true)
 	, mShowShortTabGlyphs(false)
 	, mStartTime(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count())
+	, mPaletteBase()
+	, mPalette()
+	, mAutoTooltip(true)
 {
 	SetPalette(GetDarkPalette());
 	SetLanguageDefinition(LanguageDefinition::HLSL());
@@ -1121,31 +1124,40 @@ void TextEditor::Render()
 			++lineNo;
 		}
 
+		mHoveredCoordinates = Coordinates::Invalid();
+		mHoveredWord = "";
+		mHoveredDeclaration = "";
+		mHoveredWordIndex = PaletteIndex::Max;
 		// Draw a tooltip on known identifiers/preprocessor symbols
 		if (ImGui::IsMousePosValid())
 		{
-			auto mpos = ImGui::GetMousePos();
-			ImVec2 origin = ImGui::GetCursorScreenPos();
-			ImVec2 local(mpos.x - origin.x, mpos.y - origin.y);
-			//printf("Mouse: pos(%g, %g), origin(%g, %g), local(%g, %g)\n", mpos.x, mpos.y, origin.x, origin.y, local.x, local.y);
-			if (local.x >= mTextStart)
+			mHoveredCoordinates = ScreenPosToCoordinates(ImGui::GetMousePos());
+			auto id = GetWordAt(mHoveredCoordinates);
+			mHoveredWord = id;
+			if (!id.empty())
 			{
-				auto pos = ScreenPosToCoordinates(mpos);
-				printf("Coord(%d, %d)\n", pos.mLine, pos.mColumn);
-				auto id = GetWordAt(pos);
-				if (!id.empty())
+				auto istart = GetCharacterIndex(FindWordStart(mHoveredCoordinates));
+				auto& g = mLines[mHoveredCoordinates.mLine][istart];
+				mHoveredWordIndex = g.mColorIndex;
+
+				auto it = mLanguageDefinition.mIdentifiers.find(id);
+				if (it != mLanguageDefinition.mIdentifiers.end() && !it->second.mDeclaration.empty())
 				{
-					auto it = mLanguageDefinition.mIdentifiers.find(id);
-					if (it != mLanguageDefinition.mIdentifiers.end())
+					mHoveredDeclaration = it->second.mDeclaration;
+					if (mAutoTooltip)
 					{
 						ImGui::BeginTooltip();
 						ImGui::TextUnformatted(it->second.mDeclaration.c_str());
 						ImGui::EndTooltip();
 					}
-					else
+				}
+				else
+				{
+					auto pi = mLanguageDefinition.mPreprocIdentifiers.find(id);
+					if (pi != mLanguageDefinition.mPreprocIdentifiers.end() && !pi->second.mDeclaration.empty())
 					{
-						auto pi = mLanguageDefinition.mPreprocIdentifiers.find(id);
-						if (pi != mLanguageDefinition.mPreprocIdentifiers.end())
+						mHoveredDeclaration = pi->second.mDeclaration;
+						if (mAutoTooltip)
 						{
 							ImGui::BeginTooltip();
 							ImGui::TextUnformatted(pi->second.mDeclaration.c_str());
