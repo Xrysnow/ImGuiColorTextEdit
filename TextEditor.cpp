@@ -1129,7 +1129,13 @@ void TextEditor::Render()
 		// Draw a tooltip on known identifiers/preprocessor symbols
 		if (ImGui::IsMousePosValid())
 		{
-			mHoveredCoordinates = ScreenPosToCoordinates(ImGui::GetMousePos());
+			const ImVec2 mousePos = ImGui::GetMousePos();
+			const ImVec2 origin = ImGui::GetCursorScreenPos();
+			ImVec2 local(mousePos.x - origin.x + 3.0f, mousePos.y - origin.y);
+			if (local.x < mTextStart || local.y < 0)
+				mHoveredCoordinates = Coordinates::Invalid();
+			else
+				mHoveredCoordinates = ScreenPosToCoordinates(mousePos);
 			auto id = GetWordAt(mHoveredCoordinates);
 			mHoveredWord = id;
 			if (!id.empty())
